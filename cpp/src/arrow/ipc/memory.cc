@@ -17,7 +17,12 @@
 
 #include "arrow/ipc/memory.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#include <io.h>
+#else
 #include <sys/mman.h>  // For memory-mapping
+#endif
 
 #include <algorithm>
 #include <cerrno>
@@ -41,11 +46,20 @@ MemorySource::~MemorySource() {}
 
 class MemoryMappedSource::Impl {
  public:
-  Impl() : file_(nullptr), is_open_(false), is_writable_(false), data_(nullptr) {}
+  Impl() : file_(nullptr),
+#ifdef _WIN32
+    mapping_(nullptr),
+#endif
+    is_open_(false), is_writable_(false), data_(nullptr) {}
 
   ~Impl() {
     if (is_open_) {
+#ifdef _WIN32
+      UnmapViewOfFile(data_);
+      CloseHandle(mapping_);
+#else
       munmap(data_, size_);
+#endif
       fclose(file_);
     }
   }
@@ -53,11 +67,11 @@ class MemoryMappedSource::Impl {
   Status Open(const std::string& path, MemorySource::AccessMode mode) {
     if (is_open_) { return Status::IOError("A file is already open"); }
 
-    int prot_flags = PROT_READ;
+    bool write = false;
 
     if (mode == MemorySource::READ_WRITE) {
       file_ = fopen(path.c_str(), "r+b");
-      prot_flags |= PROT_WRITE;
+      write = true;
       is_writable_ = true;
     } else {
       file_ = fopen(path.c_str(), "rb");
@@ -75,7 +89,20 @@ class MemoryMappedSource::Impl {
     fseek(file_, 0L, SEEK_SET);
     is_open_ = true;
 
-    void* result = mmap(nullptr, size_, prot_flags, MAP_SHARED, fileno(file_), 0);
+#ifdef _WIN32
+    static void *const MAP_FAILED = NULL;
+    void *result = MAP_FAILED;
+    mapping_ = CreateFileMapping(reinterpret_cast<HANDLE>(_get_osfhandle(fileno(file_))), NULL, write ? PAGE_READWRITE : PAGE_READONLY, 0, 0, NULL);
+    if (mapping_) {
+      result = MapViewOfFile(mapping_, FILE_MAP_READ | (write ? FILE_MAP_WRITE : 0), 0, 0, static_cast<SIZE_T>(size_));
+      if (!result) {
+        CloseHandle(mapping_);
+        mapping_ = NULL;
+      }
+    }
+#else
+    void* result = mmap(nullptr, size_, PROT_READ | (write ? PROT_WRITE : 0), MAP_SHARED, fileno(file_), 0);
+#endif
     if (result == MAP_FAILED) {
       std::stringstream ss;
       ss << "Memory mapping file failed, errno: " << errno;
@@ -96,6 +123,9 @@ class MemoryMappedSource::Impl {
 
  private:
   FILE* file_;
+#ifdef _WIN32
+  HANDLE mapping_;
+#endif
   int64_t size_;
   bool is_open_;
   bool is_writable_;
@@ -133,7 +163,7 @@ Status MemoryMappedSource::ReadAt(
     return Status::Invalid("position is out of bounds");
   }
 
-  nbytes = std::min(nbytes, impl_->size() - position);
+  nbytes = (std::min)(nbytes, impl_->size() - position);
   *out = std::make_shared<Buffer>(impl_->data() + position, nbytes);
   return Status::OK();
 }
@@ -166,7 +196,7 @@ Status MockMemorySource::ReadAt(
 }
 
 Status MockMemorySource::Write(int64_t position, const uint8_t* data, int64_t nbytes) {
-  extent_bytes_written_ = std::max(extent_bytes_written_, position + nbytes);
+  extent_bytes_written_ = (std::max)(extent_bytes_written_, position + nbytes);
   return Status::OK();
 }
 

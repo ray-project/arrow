@@ -32,7 +32,13 @@ namespace {
 Status AllocateAligned(int64_t size, uint8_t** out) {
   // TODO(emkornfield) find something compatible with windows
   constexpr size_t kAlignment = 64;
-  const int result = posix_memalign(reinterpret_cast<void**>(out), kAlignment, size);
+  const int result =
+#ifdef _WIN32
+    ((*out = static_cast<uint8_t *>(_aligned_malloc(size, kAlignment))) ? 0 : errno)
+#else
+    posix_memalign(reinterpret_cast<void**>(out), kAlignment, size)
+#endif
+    ;
   if (result == ENOMEM) {
     std::stringstream ss;
     ss << "malloc of size " << size << " failed";
@@ -81,7 +87,11 @@ int64_t InternalMemoryPool::bytes_allocated() const {
 
 void InternalMemoryPool::Free(uint8_t* buffer, int64_t size) {
   std::lock_guard<std::mutex> guard(pool_lock_);
+#ifdef _WIN32
+  _aligned_free(buffer);
+#else
   std::free(buffer);
+#endif
   bytes_allocated_ -= size;
 }
 
