@@ -109,6 +109,9 @@ class PrimitiveBuilder : public ArrayBuilder {
   explicit PrimitiveBuilder(MemoryPool* pool, const TypePtr& type)
       : ArrayBuilder(pool, type), data_(nullptr) {}
 
+  explicit PrimitiveBuilder(MemoryPool* pool)
+      : PrimitiveBuilder(pool, std::make_shared<Type>()) {}
+
   virtual ~PrimitiveBuilder() {}
 
   using ArrayBuilder::Advance;
@@ -127,6 +130,12 @@ class PrimitiveBuilder : public ArrayBuilder {
   }
 
   std::shared_ptr<Buffer> data() const { return data_; }
+
+  // Number of elements in the builder so far
+  int32_t num_elems() const {
+    // return length_ / type_traits<Type>::bytes_required(1);
+    return length_;
+  }
 
   // Vector append
   //

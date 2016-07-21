@@ -660,7 +660,8 @@ set(ARROW_SRCS
   src/arrow/util/status.cc
 )
 
-set(LIBARROW_LINKAGE "SHARED")
+set(LIBARROW_LINKAGE "SHARED" CACHE STRING
+    "Arrow can be built as a 'STATIC' or 'SHARED' library")
 
 add_library(arrow
   ${LIBARROW_LINKAGE}

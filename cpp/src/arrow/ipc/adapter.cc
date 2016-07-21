@@ -33,6 +33,9 @@
 #include "arrow/types/construct.h"
 #include "arrow/types/list.h"
 #include "arrow/types/primitive.h"
+#include "arrow/types/struct.h"
+#include "arrow/types/union.h"
+#include "arrow/types/string.h"
 #include "arrow/util/buffer.h"
 #include "arrow/util/logging.h"
 #include "arrow/util/status.h"
@@ -87,7 +90,7 @@ static bool IsListType(const DataType* type) {
     // case Type::CHAR:
     case Type::LIST:
       // see todo on common types
-      // case Type::STRING:
+    case Type::STRING:
       // case Type::VARCHAR:
       return true;
     default:
@@ -116,14 +119,24 @@ Status VisitArray(const Array* arr, std::vector<flatbuf::FieldNode>* field_nodes
   if (IsPrimitive(arr_type)) {
     const auto prim_arr = static_cast<const PrimitiveArray*>(arr);
     buffers->push_back(prim_arr->data());
-  } else if (IsListType(arr_type)) {
+  } else if (IsListType(arr_type) || arr->type()->type == Type::STRING) {
     const auto list_arr = static_cast<const ListArray*>(arr);
     buffers->push_back(list_arr->offset_buffer());
     RETURN_NOT_OK(VisitArray(
         list_arr->values().get(), field_nodes, buffers, max_recursion_depth - 1));
   } else if (arr->type_enum() == Type::STRUCT) {
     // TODO(wesm)
-    return Status::NotImplemented("Struct type");
+    const auto struct_arr = static_cast<const StructArray*>(arr);
+    for (auto& field_arr : struct_arr->fields()) {
+      RETURN_NOT_OK(VisitArray(field_arr.get(), field_nodes, buffers, max_recursion_depth - 1));
+    }
+  } else if (arr->type_enum() == Type::DENSE_UNION) {
+    const auto union_arr = static_cast<const DenseUnionArray*>(arr);
+    buffers->push_back(union_arr->types());
+    buffers->push_back(union_arr->offset_buf());
+    for (auto& child_arr : union_arr->children()) {
+      RETURN_NOT_OK(VisitArray(child_arr.get(), field_nodes, buffers, max_recursion_depth - 1));
+    }
   } else {
     return Status::NotImplemented("Unrecognized type");
   }
@@ -158,7 +171,7 @@ class RowBatchWriter {
         // requirements of buffers but capacity always should.
         size = buffer->capacity();
         // check that padding is appropriate
-        RETURN_NOT_OK(CheckMultipleOf64(size));
+        RETURN_NOT_OK(CheckMultipleOf64(size)); // TODO(pcm): put this in again
       }
       // TODO(wesm): We currently have no notion of shared memory page id's,
       // but we've included it in the metadata IDL for when we have it in the
@@ -316,6 +329,40 @@ class RowBatchReader::Impl {
           NextArray(type->child(0).get(), max_recursion_depth - 1, &values_array));
       return MakeListArray(type, field_meta.length, offsets, values_array,
           field_meta.null_count, null_bitmap, out);
+    } else if (type->type == Type::STRUCT) {
+      int32_t length = 0;
+      const int num_children = type->num_children();
+      std::vector<ArrayPtr> results;
+      for (int i = 0; i < num_children; ++i) {
+        std::shared_ptr<Array> result;
+        RETURN_NOT_OK(NextArray(type->child(i).get(), max_recursion_depth - 1, &result));
+        DCHECK(length == 0 || length == result->length());
+        length = result->length();
+        results.push_back(result);
+      }
+      *out = std::make_shared<StructArray>(type, length, results);
+      return Status::OK();
+    } else if (type->type == Type::DENSE_UNION) {
+      std::shared_ptr<Buffer> types;
+      RETURN_NOT_OK(GetBuffer(buffer_index_++, &types));
+      std::shared_ptr<Buffer> offset_buf;
+      RETURN_NOT_OK(GetBuffer(buffer_index_++, &offset_buf));
+      auto type2 = std::dynamic_pointer_cast<DenseUnionType>(type);
+      if (!type2) {
+        return Status::Invalid("unexpected error");
+      }
+      const int num_children = type2->num_children();
+
+      std::vector<ArrayPtr> results;
+      for (int i = 0; i < num_children; ++i) {
+        std::shared_ptr<Array> result;
+        auto f = std::make_shared<Field>(std::string(""), type2->child(i), false);
+        RETURN_NOT_OK(NextArray(f.get(), max_recursion_depth - 1, &result));
+        results.push_back(result);
+      }
+      *out = std::make_shared<DenseUnionArray>(type, field_meta.length, results, types, offset_buf,
+          field_meta.null_count, null_bitmap);
+      return Status::OK();
     }
     return Status::NotImplemented("Non-primitive types not complete yet");
   }

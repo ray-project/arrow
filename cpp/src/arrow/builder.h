@@ -129,6 +129,15 @@ class ArrayBuilder {
   DISALLOW_COPY_AND_ASSIGN(ArrayBuilder);
 };
 
+class NullArrayBuilder : public ArrayBuilder {
+public:
+  explicit NullArrayBuilder(MemoryPool* pool, const TypePtr& type) : ArrayBuilder(pool, type) {}
+  virtual ~NullArrayBuilder() {};
+  std::shared_ptr<Array> Finish() override {
+    return nullptr;
+  }
+};
+
 }  // namespace arrow
 
 #endif  // ARROW_BUILDER_H_

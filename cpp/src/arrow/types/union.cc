@@ -26,6 +26,41 @@
 
 namespace arrow {
 
+bool DenseUnionArray::Equals(const std::shared_ptr<Array>& arr) const {
+  if (this == arr.get()) { return true; }
+  if (!arr) { return false; }
+  if (this->type_enum() != arr->type_enum()) { return false; }
+  if (null_count_ != arr->null_count()) { return false; }
+  return RangeEquals(0, length_, 0, arr);
+}
+
+bool DenseUnionArray::RangeEquals(int32_t start_idx, int32_t end_idx, int32_t other_start_idx,
+      const std::shared_ptr<Array>& arr) const {
+  if (this == arr.get()) { return true; }
+  if (Type::DENSE_UNION != arr->type_enum()) { return false; }
+  const auto other = static_cast<DenseUnionArray*>(arr.get());
+
+  int32_t i = start_idx;
+  int32_t o_i = other_start_idx;
+  for (size_t c = 0; c < other->children().size(); ++c) {
+    for (int32_t e = 0; e < other->children()[c]->length(); ++e) {
+      if (!children()[c]->RangeEquals(e, e + 1, e, other->children()[c])) { // FIXME(pcm): fix this
+        return false;
+      }
+      i += 1;
+      o_i += 1;
+      if (i >= end_idx) {
+        return true;
+      }
+    }
+  }
+  return false; // to make the compiler happy
+}
+
+Status DenseUnionArray::Validate() const {
+  return Status::OK();
+}
+
 static inline std::string format_union(const std::vector<TypePtr>& child_types) {
   std::stringstream s;
   s << "union<";

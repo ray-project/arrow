@@ -170,7 +170,11 @@ class ListBuilder : public ArrayBuilder {
   Status Append(bool is_valid = true) {
     RETURN_NOT_OK(Reserve(1));
     UnsafeAppendToBitmap(is_valid);
-    RETURN_NOT_OK(offset_builder_.Append<int32_t>(value_builder_->length()));
+    if (value_builder_) {
+      RETURN_NOT_OK(offset_builder_.Append<int32_t>(value_builder_->length()));
+    } else {
+      RETURN_NOT_OK(offset_builder_.Append<int32_t>(0));
+    }
     return Status::OK();
   }
 

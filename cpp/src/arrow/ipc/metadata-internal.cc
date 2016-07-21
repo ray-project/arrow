@@ -28,6 +28,7 @@
 #include "arrow/ipc/Message_generated.h"
 #include "arrow/schema.h"
 #include "arrow/type.h"
+#include "arrow/types/union.h"
 #include "arrow/util/buffer.h"
 #include "arrow/util/status.h"
 
@@ -118,11 +119,20 @@ static Status TypeFromFlatbuffer(flatbuf::Type type, const void* type_data,
       }
       *out = std::make_shared<ListType>(children[0]);
       return Status::OK();
+    case flatbuf::Type_Str:
+      *out = std::make_shared<StringType>();
+      return Status::OK();
     case flatbuf::Type_Tuple:
       *out = std::make_shared<StructType>(children);
       return Status::OK();
-    case flatbuf::Type_Union:
-      return Status::NotImplemented("Type is not implemented");
+    case flatbuf::Type_Union: {
+      std::vector<TypePtr> child_types;
+      for (auto type : children) {
+        child_types.push_back(type->type);
+      }
+      *out = std::make_shared<DenseUnionType>(child_types); // TODO(pcm): SparseUnionType
+      return Status::OK();
+    }
     default:
       return Status::Invalid("Unrecognized type");
   }
@@ -131,6 +141,10 @@ static Status TypeFromFlatbuffer(flatbuf::Type type, const void* type_data,
 // Forward declaration
 static Status FieldToFlatbuffer(
     FBB& fbb, const std::shared_ptr<Field>& field, FieldOffset* offset);
+
+// Forward declaration
+static Status TypeToFlatbuffer(FBB& fbb, const std::shared_ptr<DataType>& type,
+    std::vector<FieldOffset>* children, flatbuf::Type* out_type, Offset* offset);
 
 static Offset IntToFlatbuffer(FBB& fbb, int bitWidth, bool is_signed) {
   return flatbuf::CreateInt(fbb, bitWidth, is_signed).Union();
@@ -157,6 +171,22 @@ static Status StructToFlatbuffer(FBB& fbb, const std::shared_ptr<DataType>& type
     out_children->push_back(field);
   }
   *offset = flatbuf::CreateTuple(fbb).Union();
+  return Status::OK();
+}
+
+static Status UnionToFlatbuffer(FBB& fbb, const std::shared_ptr<DataType>& type,
+    std::vector<FieldOffset>* out_children, Offset* offset) {
+  auto type2 = std::dynamic_pointer_cast<DenseUnionType>(type);
+  if (!type2) {
+    return Status::Invalid("unexpected error");
+  }
+  FieldOffset field;
+  for (int i = 0; i < type2->num_children(); ++i) {
+    auto f = std::make_shared<Field>(std::string(""), type2->child(i), false);
+    RETURN_NOT_OK(FieldToFlatbuffer(fbb, f, &field));
+    out_children->push_back(field);
+  }
+  *offset = flatbuf::CreateUnion(fbb).Union();
   return Status::OK();
 }
 
@@ -199,9 +229,16 @@ static Status TypeToFlatbuffer(FBB& fbb, const std::shared_ptr<DataType>& type,
     case Type::LIST:
       *out_type = flatbuf::Type_List;
       return ListToFlatbuffer(fbb, type, children, offset);
+    case Type::STRING:
+      *out_type = flatbuf::Type_Str;
+      *offset = flatbuf::CreateStr(fbb).Union();
+      return Status::OK();
     case Type::STRUCT:
       *out_type = flatbuf::Type_Tuple;
       return StructToFlatbuffer(fbb, type, children, offset);
+    case Type::DENSE_UNION:
+      *out_type = flatbuf::Type_Union;
+      return UnionToFlatbuffer(fbb, type, children, offset);
     default:
       *out_type = flatbuf::Type_NONE;  // Make clang-tidy happy
       std::stringstream ss;

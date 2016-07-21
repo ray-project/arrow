@@ -25,6 +25,7 @@
 #include "arrow/array.h"
 #include "arrow/type.h"
 #include "arrow/types/collection.h"
+#include "arrow/types/primitive.h"
 
 namespace arrow {
 
@@ -51,15 +52,47 @@ struct SparseUnionType : public CollectionType<Type::SPARSE_UNION> {
 };
 
 class UnionArray : public Array {
+ public:
+  UnionArray(const TypePtr& type, int32_t length, std::vector<ArrayPtr>& children,
+      std::shared_ptr<Buffer> types,
+      int32_t null_count = 0, std::shared_ptr<Buffer> null_bitmap = nullptr)
+      : Array(type, length, null_count, null_bitmap), types_(types) {
+    type_ = type;
+    children_ = children;
+    // CHECK_EQ(children.size() * sizeof(int16_t), types.size());
+  }
+
+  const std::shared_ptr<Buffer>& types() const { return types_; }
+
+  const std::vector<ArrayPtr>& children() const { return children_; }
+
+  ArrayPtr  child(int32_t index) const { return children_[index]; }
+
  protected:
   // The data are types encoded as int16
-  Buffer* types_;
+  std::shared_ptr<Buffer> types_;
   std::vector<std::shared_ptr<Array>> children_;
 };
 
 class DenseUnionArray : public UnionArray {
+ public:
+  DenseUnionArray(const TypePtr& type, int32_t length, std::vector<ArrayPtr>& children,
+      std::shared_ptr<Buffer> types, std::shared_ptr<Buffer> offset_buf,
+      int32_t null_count = 0, std::shared_ptr<Buffer> null_bitmap = nullptr)
+      : UnionArray(type, length, children, types, null_count, null_bitmap) {
+    offset_buf_ = offset_buf;
+  }
+
+  const std::shared_ptr<Buffer>& offset_buf() const { return offset_buf_; }
+
+  Status Validate() const override;
+
+  bool Equals(const std::shared_ptr<Array>& arr) const override;
+  bool RangeEquals(int32_t start_idx, int32_t end_idx, int32_t other_start_idx,
+      const std::shared_ptr<Array>& arr) const override;
+
  protected:
-  Buffer* offset_buf_;
+  std::shared_ptr<Buffer> offset_buf_;
 };
 
 class SparseUnionArray : public UnionArray {};

@@ -34,6 +34,19 @@ struct CollectionType : public DataType {
   const TypePtr& child(int i) const { return child_types_[i]; }
 
   int num_children() const { return child_types_.size(); }
+
+  bool Equals(const DataType* other) const override {
+    bool equals = other && ((this == other) || ((this->type == other->type)));
+    auto second = dynamic_cast<const CollectionType<T>*>(other);
+    equals = equals && other && this->num_children() == second->num_children();
+    if (equals) {
+      for (int i = 0; i < num_children(); ++i) {
+        // TODO(emkornfield) limit recursion
+        if (!child(i)->Equals(second->child(i))) { return false; }
+      }
+    }
+    return equals;
+  }
 };
 
 }  // namespace arrow

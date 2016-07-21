@@ -425,8 +425,8 @@ of overhead for each value. Its physical layout is as follows:
 
 * One child array for each relative type
 * Types buffer: A buffer of 8-bit signed integers, enumerated from 0 corresponding
-  to each type.  A union with more then 127 possible types can be modeled as a
-  union of unions. 
+  to each type.  A union with more than 127 possible types can be modeled as a
+  union of unions.
 * Offsets buffer: A buffer of signed int32 values indicating the relative offset
   into the respective child array for the type in a given slot. The respective
   offsets for each child value array must be in order / increasing.
@@ -578,7 +578,7 @@ the the types array indicates that a slot contains a different type at the index
 
 ## References
 
-Apache Drill Documentation - [Value Vectors][6] 
+Apache Drill Documentation - [Value Vectors][6]
 
 [1]: https://en.wikipedia.org/wiki/Bit_numbering
 [2]: https://software.intel.com/en-us/articles/practical-intel-avx-optimization-on-2nd-generation-intel-core-processors

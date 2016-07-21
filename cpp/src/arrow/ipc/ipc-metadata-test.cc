@@ -21,10 +21,12 @@
 
 #include "gtest/gtest.h"
 
+#include "arrow/api.h"
 #include "arrow/ipc/metadata.h"
 #include "arrow/schema.h"
 #include "arrow/test-util.h"
 #include "arrow/type.h"
+#include "arrow/types/union.h"
 #include "arrow/util/status.h"
 
 namespace arrow {
@@ -91,6 +93,15 @@ TEST_F(TestSchemaMessage, NestedFields) {
   auto f1 = std::make_shared<Field>("f1", type2);
 
   Schema schema({f0, f1});
+  CheckRoundtrip(&schema);
+}
+
+TEST_F(TestSchemaMessage, DenseUnion) {
+  auto t0 = TypePtr(new Int32Type());
+  auto t1 = TypePtr(new Int64Type());
+  auto u = TypePtr(new DenseUnionType(std::vector<TypePtr>({t0, t1})));
+  auto f = std::make_shared<Field>("f", u);
+  Schema schema({f});
   CheckRoundtrip(&schema);
 }
 
