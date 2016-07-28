@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{10E7D8E8-0EEB-46EA-A58D-F9236B5960AD}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="Arrow.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemGroup>
+    <ClCompile Include="..\cpp\src\arrow\array.cc" />
+    <ClCompile Include="..\cpp\src\arrow\builder.cc" />
+    <ClCompile Include="..\cpp\src\arrow\column.cc" />
+    <ClCompile Include="..\cpp\src\arrow\ipc\adapter.cc" />
+    <ClCompile Include="..\cpp\src\arrow\ipc\memory.cc" />
+    <ClCompile Include="..\cpp\src\arrow\ipc\metadata-internal.cc" />
+    <ClCompile Include="..\cpp\src\arrow\ipc\metadata.cc" />
+    <ClCompile Include="..\cpp\src\arrow\schema.cc" />
+    <ClCompile Include="..\cpp\src\arrow\table.cc" />
+    <ClCompile Include="..\cpp\src\arrow\type.cc" />
+    <ClCompile Include="..\cpp\src\arrow\types\construct.cc" />
+    <ClCompile Include="..\cpp\src\arrow\types\decimal.cc" />
+    <ClCompile Include="..\cpp\src\arrow\types\json.cc" />
+    <ClCompile Include="..\cpp\src\arrow\types\list.cc" />
+    <ClCompile Include="..\cpp\src\arrow\types\primitive.cc" />
+    <ClCompile Include="..\cpp\src\arrow\types\string.cc" />
+    <ClCompile Include="..\cpp\src\arrow\types\struct.cc" />
+    <ClCompile Include="..\cpp\src\arrow\types\union.cc" />
+    <ClCompile Include="..\cpp\src\arrow\util\bit-util.cc" />
+    <ClCompile Include="..\cpp\src\arrow\util\buffer.cc" />
+    <ClCompile Include="..\cpp\src\arrow\util\memory-pool.cc" />
+    <ClCompile Include="..\cpp\src\arrow\util\status.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\cpp\src\arrow\api.h" />
+    <ClInclude Include="..\cpp\src\arrow\array.h" />
+    <ClInclude Include="..\cpp\src\arrow\builder.h" />
+    <ClInclude Include="..\cpp\src\arrow\column.h" />
+    <ClInclude Include="..\cpp\src\arrow\ipc\adapter.h" />
+    <ClInclude Include="..\cpp\src\arrow\ipc\memory.h" />
+    <ClInclude Include="..\cpp\src\arrow\ipc\metadata-internal.h" />
+    <ClInclude Include="..\cpp\src\arrow\ipc\metadata.h" />
+    <ClInclude Include="..\cpp\src\arrow\ipc\test-common.h" />
+    <ClInclude Include="..\cpp\src\arrow\schema.h" />
+    <ClInclude Include="..\cpp\src\arrow\table.h" />
+    <ClInclude Include="..\cpp\src\arrow\test-util.h" />
+    <ClInclude Include="..\cpp\src\arrow\type.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\binary.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\collection.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\construct.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\datetime.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\decimal.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\json.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\list.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\primitive.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\string.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\struct.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\test-common.h" />
+    <ClInclude Include="..\cpp\src\arrow\types\union.h" />
+    <ClInclude Include="..\cpp\src\arrow\util\bit-util.h" />
+    <ClInclude Include="..\cpp\src\arrow\util\buffer.h" />
+    <ClInclude Include="..\cpp\src\arrow\util\logging.h" />
+    <ClInclude Include="..\cpp\src\arrow\util\macros.h" />
+    <ClInclude Include="..\cpp\src\arrow\util\memory-pool.h" />
+    <ClInclude Include="..\cpp\src\arrow\util\random.h" />
+    <ClInclude Include="..\cpp\src\arrow\util\status.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\format\Message.fbs">
+      <FileType>Document</FileType>
+      <Command>"$(OutDir)flatc.exe" -c -o "$(ProjectDir)..\cpp\src\arrow\ipc" "$(ProjectDir)..\format\Message.fbs"</Command>
+      <Outputs>$(ProjectDir)..\cpp\src\arrow\ipc\Message_generated.h;%(Outputs)</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\cpp\thirdparty\flatbuffers\build_ide\VS2010\flatc.vcxproj">
+      <Project>{5b5857e1-64e2-4ced-a12e-45e1b3880496}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
