@@ -86,7 +86,7 @@ static bool IsListType(const DataType* type) {
     //
     // TODO(emkornfield) Fix type systems so these are all considered lists and
     // the types behave the same way?
-    // case Type::BINARY:
+    case Type::BINARY:
     // case Type::CHAR:
     case Type::LIST:
       // see todo on common types

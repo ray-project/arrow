@@ -106,6 +106,8 @@ static Status TypeFromFlatbuffer(flatbuf::Type type, const void* type_data,
       return FloatFromFlatuffer(
           static_cast<const flatbuf::FloatingPoint*>(type_data), out);
     case flatbuf::Type_Binary:
+      *out = std::make_shared<BinaryType>();
+      return Status::OK();
     case flatbuf::Type_Utf8:
       return Status::NotImplemented("Type is not implemented");
     case flatbuf::Type_Bool:
@@ -232,6 +234,10 @@ static Status TypeToFlatbuffer(FBB& fbb, const std::shared_ptr<DataType>& type,
     case Type::STRING:
       *out_type = flatbuf::Type_Str;
       *offset = flatbuf::CreateStr(fbb).Union();
+      return Status::OK();
+    case Type::BINARY:
+      *out_type = flatbuf::Type_Binary;
+      *offset = flatbuf::CreateBinary(fbb).Union();
       return Status::OK();
     case Type::STRUCT:
       *out_type = flatbuf::Type_Tuple;
