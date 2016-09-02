@@ -245,7 +245,7 @@ Status GetRowBatchSize(const RowBatch* batch, int64_t* size) {
 // ----------------------------------------------------------------------
 // Row batch read path
 
-static constexpr int64_t INIT_METADATA_SIZE = 4096;
+static constexpr int64_t INIT_METADATA_SIZE = 4096 * 4;
 
 class RowBatchReader::Impl {
  public:
