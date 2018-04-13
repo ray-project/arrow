@@ -38,7 +38,6 @@
 
 #include <algorithm>
 #include <mutex>
-#include <thread>
 #include <vector>
 
 #include "arrow/buffer.h"
@@ -101,7 +100,7 @@ static std::unordered_map<ObjectID, GpuProcessHandle*, UniqueIDHasher> gpu_objec
 static std::mutex gpu_mutex;
 #endif
 
-PlasmaClient::PlasmaClient() {
+PlasmaClient::PlasmaClient() : threadpool_(kThreadPoolSize) {
 #ifdef PLASMA_GPU
   CudaDeviceManager::GetInstance(&manager_);
 #endif
@@ -509,7 +508,7 @@ static void ComputeBlockHash(const unsigned char* data, int64_t nbytes, uint64_t
   *hash = XXH64_digest(&hash_state);
 }
 
-static inline bool compute_object_hash_parallel(XXH64_state_t* hash_state,
+bool PlasmaClient::compute_object_hash_parallel(XXH64_state_t* hash_state,
                                                 const unsigned char* data,
                                                 int64_t nbytes) {
   // Note that this function will likely be faster if the address of data is
@@ -545,7 +544,7 @@ static inline bool compute_object_hash_parallel(XXH64_state_t* hash_state,
   return true;
 }
 
-static uint64_t compute_object_hash(const ObjectBuffer& obj_buffer) {
+uint64_t PlasmaClient::compute_object_hash(const ObjectBuffer& obj_buffer) {
   XXH64_state_t hash_state;
   if (obj_buffer.device_num != 0) {
     // TODO(wap): Create cuda program to hash data on gpu.
