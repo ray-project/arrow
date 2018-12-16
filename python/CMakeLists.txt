@@ -198,6 +198,8 @@ find_package(PythonLibsNew REQUIRED)
 find_package(NumPy REQUIRED)
 include(UseCython)
 
+find_package(Boost COMPONENTS system thread atomic chrono date_time filesystem regex REQUIRED)
+
 include_directories(SYSTEM
   ${NUMPY_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
