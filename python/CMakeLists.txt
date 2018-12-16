@@ -201,6 +201,7 @@ include(UseCython)
 include_directories(SYSTEM
   ${NUMPY_INCLUDE_DIRS}
   ${PYTHON_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIR}
   src)
 
 ############################################################
@@ -332,10 +333,14 @@ if (PYARROW_BUNDLE_ARROW_CPP)
       # disable autolinking in boost
       add_definitions(-DBOOST_ALL_NO_LIB)
     endif()
-    find_package(Boost COMPONENTS system filesystem regex REQUIRED)
+    find_package(Boost COMPONENTS system thread atomic chrono date_time filesystem regex REQUIRED)
     bundle_boost_lib(Boost_REGEX_LIBRARY)
     bundle_boost_lib(Boost_FILESYSTEM_LIBRARY)
     bundle_boost_lib(Boost_SYSTEM_LIBRARY)
+    bundle_boost_lib(Boost_THREAD_LIBRARY)
+    bundle_boost_lib(Boost_ATOMIC_LIBRARY)
+    bundle_boost_lib(Boost_CHRONO_LIBRARY)
+    bundle_boost_lib(Boost_DATE_TIME_LIBRARY)
   endif()
 
   bundle_zlib()

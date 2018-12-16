@@ -17,6 +17,9 @@
 
 #include <mutex>
 
+#include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
+
 #include "arrow/util/logging.h"
 #include "arrow/util/utf8.h"
 
@@ -73,10 +76,10 @@ ARROW_EXPORT void CheckUTF8Initialized() {
 
 }  // namespace internal
 
-static std::once_flag utf8_initialized;
+static boost::once_flag utf8_initialized = BOOST_ONCE_INIT;
 
 void InitializeUTF8() {
-  std::call_once(utf8_initialized, internal::InitializeLargeTable);
+  boost::call_once(internal::InitializeLargeTable, utf8_initialized);
 }
 
 }  // namespace util
