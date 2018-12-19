@@ -714,7 +714,7 @@ if (NOT MSVC)
     ${CMAKE_DL_LIBS})
 endif()
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
   set(ARROW_LINK_LIBS ${ARROW_LINK_LIBS} -lrt)
   set(ARROW_STATIC_LINK_LIBS ${ARROW_STATIC_LINK_LIBS} -lrt)
 endif()
