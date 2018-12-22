@@ -364,11 +364,14 @@ if (ARROW_BOOST_VENDORED)
   set(BOOST_BUILD_LINK "static")
   set(BOOST_STATIC_SYSTEM_LIBRARY
     "${BOOST_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}boost_system${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(BOOST_STATIC_THREAD_LIBRARY
+      "${BOOST_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}boost_thread${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(BOOST_STATIC_FILESYSTEM_LIBRARY
     "${BOOST_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}boost_filesystem${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(BOOST_STATIC_REGEX_LIBRARY
     "${BOOST_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}boost_regex${CMAKE_STATIC_LIBRARY_SUFFIX}")
   set(BOOST_SYSTEM_LIBRARY boost_system_static)
+  set(BOOST_THREAD_LIBRARY boost_thread_static)
   set(BOOST_FILESYSTEM_LIBRARY boost_filesystem_static)
   set(BOOST_REGEX_LIBRARY boost_regex_static)
 
@@ -379,12 +382,13 @@ if (ARROW_BOOST_VENDORED)
   else()
     set(BOOST_BUILD_PRODUCTS
       ${BOOST_STATIC_SYSTEM_LIBRARY}
+      ${BOOST_STATIC_THREAD_LIBRARY}
       ${BOOST_STATIC_FILESYSTEM_LIBRARY}
       ${BOOST_STATIC_REGEX_LIBRARY})
     set(BOOST_CONFIGURE_COMMAND
       "./bootstrap.sh"
       "--prefix=${BOOST_PREFIX}"
-      "--with-libraries=filesystem,regex,system")
+      "--with-libraries=filesystem,regex,system,thread")
     if ("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
       set(BOOST_BUILD_VARIANT "debug")
     else()
@@ -431,17 +435,20 @@ else()
     if (ARROW_BOOST_HEADER_ONLY)
       find_package(Boost REQUIRED)
     else()
-      find_package(Boost COMPONENTS regex system filesystem REQUIRED)
+      find_package(Boost COMPONENTS regex system thread filesystem REQUIRED)
       if ("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
         set(BOOST_SHARED_SYSTEM_LIBRARY ${Boost_SYSTEM_LIBRARY_DEBUG})
+        set(BOOST_SHARED_THREAD_LIBRARY ${Boost_THREAD_LIBRARY_DEBUG})
         set(BOOST_SHARED_FILESYSTEM_LIBRARY ${Boost_FILESYSTEM_LIBRARY_DEBUG})
         set(BOOST_SHARED_REGEX_LIBRARY ${Boost_REGEX_LIBRARY_DEBUG})
       else()
         set(BOOST_SHARED_SYSTEM_LIBRARY ${Boost_SYSTEM_LIBRARY_RELEASE})
+        set(BOOST_SHARED_THREAD_LIBRARY ${Boost_THREAD_LIBRARY_RELEASE})
         set(BOOST_SHARED_FILESYSTEM_LIBRARY ${Boost_FILESYSTEM_LIBRARY_RELEASE})
         set(BOOST_SHARED_REGEX_LIBRARY ${Boost_REGEX_LIBRARY_RELEASE})
       endif()
       set(BOOST_SYSTEM_LIBRARY boost_system_shared)
+      set(BOOST_THREAD_LIBRARY boost_thread_shared)
       set(BOOST_FILESYSTEM_LIBRARY boost_filesystem_shared)
       set(BOOST_REGEX_LIBRARY boost_regex_shared)
     endif()
@@ -452,17 +459,20 @@ else()
     if (ARROW_BOOST_HEADER_ONLY)
       find_package(Boost REQUIRED)
     else()
-      find_package(Boost COMPONENTS regex system filesystem REQUIRED)
+      find_package(Boost COMPONENTS regex system thread atomic chrono date_time filesystem REQUIRED)
       if ("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
         set(BOOST_STATIC_SYSTEM_LIBRARY ${Boost_SYSTEM_LIBRARY_DEBUG})
+        set(BOOST_STATIC_THREAD_LIBRARY ${Boost_THREAD_LIBRARY_DEBUG})
         set(BOOST_STATIC_FILESYSTEM_LIBRARY ${Boost_FILESYSTEM_LIBRARY_DEBUG})
         set(BOOST_STATIC_REGEX_LIBRARY ${Boost_REGEX_LIBRARY_DEBUG})
       else()
         set(BOOST_STATIC_SYSTEM_LIBRARY ${Boost_SYSTEM_LIBRARY_RELEASE})
+        set(BOOST_STATIC_THREAD_LIBRARY ${Boost_THREAD_LIBRARY_RELEASE})
         set(BOOST_STATIC_FILESYSTEM_LIBRARY ${Boost_FILESYSTEM_LIBRARY_RELEASE})
         set(BOOST_STATIC_REGEX_LIBRARY ${Boost_REGEX_LIBRARY_RELEASE})
       endif()
       set(BOOST_SYSTEM_LIBRARY boost_system_static)
+      set(BOOST_THREAD_LIBRARY boost_thread_static)
       set(BOOST_FILESYSTEM_LIBRARY boost_filesystem_static)
       set(BOOST_REGEX_LIBRARY boost_regex_static)
     endif()
@@ -477,6 +487,10 @@ if (NOT ARROW_BOOST_HEADER_ONLY)
       STATIC_LIB "${BOOST_STATIC_SYSTEM_LIBRARY}"
       SHARED_LIB "${BOOST_SHARED_SYSTEM_LIBRARY}")
 
+  ADD_THIRDPARTY_LIB(boost_thread
+          STATIC_LIB "${BOOST_STATIC_THREAD_LIBRARY}"
+          SHARED_LIB "${BOOST_SHARED_THREAD_LIBRARY}")
+
   ADD_THIRDPARTY_LIB(boost_filesystem
       STATIC_LIB "${BOOST_STATIC_FILESYSTEM_LIBRARY}"
       SHARED_LIB "${BOOST_SHARED_FILESYSTEM_LIBRARY}")
@@ -485,7 +499,7 @@ if (NOT ARROW_BOOST_HEADER_ONLY)
       STATIC_LIB "${BOOST_STATIC_REGEX_LIBRARY}"
       SHARED_LIB "${BOOST_SHARED_REGEX_LIBRARY}")
 
-  SET(ARROW_BOOST_LIBS ${BOOST_SYSTEM_LIBRARY} ${BOOST_FILESYSTEM_LIBRARY})
+  SET(ARROW_BOOST_LIBS ${BOOST_SYSTEM_LIBRARY} ${BOOST_THREAD_LIBRARY} ${BOOST_FILESYSTEM_LIBRARY})
 endif()
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})

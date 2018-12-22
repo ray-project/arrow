@@ -53,6 +53,7 @@ using arrow::BooleanArray;
 using arrow::ChunkedArray;
 using arrow::Column;
 using arrow::Field;
+using arrow::Future;
 using arrow::Int32Array;
 using arrow::ListArray;
 using arrow::MemoryPool;
@@ -504,7 +505,7 @@ Status FileReader::Impl::ReadRowGroup(int row_group_index,
   };
 
   if (use_threads_) {
-    std::vector<std::future<Status>> futures;
+    std::vector<Future<Status>> futures;
     auto pool = ::arrow::internal::GetCpuThreadPool();
     for (int i = 0; i < num_columns; i++) {
       futures.push_back(pool->Submit(ReadColumnFunc, i));
@@ -551,7 +552,7 @@ Status FileReader::Impl::ReadTable(const std::vector<int>& indices,
   };
 
   if (use_threads_) {
-    std::vector<std::future<Status>> futures;
+    std::vector<Future<Status>> futures;
     auto pool = ::arrow::internal::GetCpuThreadPool();
     for (int i = 0; i < num_fields; i++) {
       futures.push_back(pool->Submit(ReadColumnFunc, i));
