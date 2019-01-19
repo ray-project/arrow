@@ -40,9 +40,9 @@
 #include <time.h>
 #include <errno.h>
 
-#include "ae.h"
-#include "zmalloc.h"
-#include "config.h"
+#include "plasma/thirdparty/ae/ae.h"
+#include "plasma/thirdparty/ae/zmalloc.h"
+#include "plasma/thirdparty/ae/config.h"
 
 /* Include the best multiplexing layer supported by this system.
  * The following should be ordered by performances, descending. */
