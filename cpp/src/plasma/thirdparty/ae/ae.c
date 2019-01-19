@@ -47,15 +47,15 @@
 /* Include the best multiplexing layer supported by this system.
  * The following should be ordered by performances, descending. */
 #ifdef HAVE_EVPORT
-#include "ae_evport.c"
+#include "plasma/thirdparty/ae/ae_evport.c"
 #else
     #ifdef HAVE_EPOLL
-    #include "ae_epoll.c"
+    #include "plasma/thirdparty/ae/ae_epoll.c"
     #else
         #ifdef HAVE_KQUEUE
-        #include "ae_kqueue.c"
+        #include "plasma/thirdparty/ae/ae_kqueue.c"
         #else
-        #include "ae_select.c"
+        #include "plasma/thirdparty/ae/ae_select.c"
         #endif
     #endif
 #endif
