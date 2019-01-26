@@ -83,8 +83,6 @@ struct CudaIpcPlaceholder {};
 struct ObjectTableEntry {
   ObjectTableEntry();
 
-  ~ObjectTableEntry();
-
   /// Memory mapped file containing the object.
   int fd;
   /// Device number.
