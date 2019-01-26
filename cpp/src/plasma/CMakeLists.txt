@@ -75,6 +75,7 @@ set(PLASMA_SRCS
     fling.cc
     io.cc
     malloc.cc
+    dlmalloc.cc
     plasma.cc
     plasma_allocator.cc
     protocol.cc
