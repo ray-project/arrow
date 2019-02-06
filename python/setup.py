@@ -369,6 +369,18 @@ class build_ext(_build_ext):
                         implib_required=False)
                     move_shared_libs(
                         build_prefix, build_lib,
+                        "{}_thread".format(self.boost_namespace))
+                    move_shared_libs(
+                        build_prefix, build_lib,
+                        "{}_atomic".format(self.boost_namespace))
+                    move_shared_libs(
+                        build_prefix, build_lib,
+                        "{}_chrono".format(self.boost_namespace))
+                    move_shared_libs(
+                        build_prefix, build_lib,
+                        "{}_date_time".format(self.boost_namespace))
+                    move_shared_libs(
+                        build_prefix, build_lib,
                         "{}_regex".format(self.boost_namespace),
                         implib_required=False)
                 if sys.platform == 'win32':

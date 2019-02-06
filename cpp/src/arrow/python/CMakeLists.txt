@@ -53,7 +53,7 @@ if("${COMPILER_FAMILY}" STREQUAL "clang")
   set_property(SOURCE pyarrow.cc APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-cast-qual ")
 endif()
 
-set(ARROW_PYTHON_SHARED_LINK_LIBS arrow_shared ${PYTHON_OTHER_LIBS})
+set(ARROW_PYTHON_SHARED_LINK_LIBS arrow_shared ${PYTHON_OTHER_LIBS} ${BOOST_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 if(ARROW_FLIGHT)
   # Must link shared: we don't want to link more than one copy of gRPC
