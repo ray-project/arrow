@@ -23,6 +23,8 @@
 #include <string>
 #include <utility>
 
+#include "arrow/python/config.h"
+
 #include "arrow/buffer.h"
 #include "arrow/python/visibility.h"
 #include "arrow/util/macros.h"
