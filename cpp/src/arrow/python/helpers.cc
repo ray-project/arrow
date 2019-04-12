@@ -27,14 +27,14 @@
 
 #include "arrow/python/common.h"
 // #include "arrow/python/decimal.h"
-#include "arrow/util/checked_cast.h"
+// #include "arrow/util/checked_cast.h"
 #include "arrow/util/logging.h"
 
 #include <arrow/api.h>
 
 namespace arrow {
 
-using internal::checked_cast;
+// using internal::checked_cast;
 
 namespace py {
 
