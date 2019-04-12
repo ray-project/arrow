@@ -16,7 +16,7 @@
 // under the License.
 
 // helpers.h includes a NumPy header, so we include this first
-#include "arrow/python/numpy_interop.h"
+// #include "arrow/python/numpy_interop.h"
 
 #include "arrow/python/helpers.h"
 
