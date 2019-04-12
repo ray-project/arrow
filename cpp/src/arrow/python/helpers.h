@@ -26,7 +26,7 @@
 #include <utility>
 
 #include "arrow/python/visibility.h"
-#include "arrow/type.h"
+// #include "arrow/type.h"
 #include "arrow/util/macros.h"
 
 namespace arrow {
@@ -38,7 +38,7 @@ class OwnedRef;
 // \brief Get an arrow DataType instance from Arrow's Type::type enum
 // \param[in] type One of the values of Arrow's Type::type enum
 // \return A shared pointer to DataType
-ARROW_PYTHON_EXPORT std::shared_ptr<DataType> GetPrimitiveType(Type::type type);
+// ARROW_PYTHON_EXPORT std::shared_ptr<DataType> GetPrimitiveType(Type::type type);
 
 // \brief Construct a np.float16 object from a npy_half value.
 // ARROW_PYTHON_EXPORT PyObject* PyHalf_FromHalf(npy_half value);

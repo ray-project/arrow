@@ -38,6 +38,7 @@ using internal::checked_cast;
 
 namespace py {
 
+/*
 #define GET_PRIMITIVE_TYPE(NAME, FACTORY) \
   case Type::NAME:                        \
     return FACTORY()
@@ -84,6 +85,7 @@ Status PyFloat_AsHalf(PyObject* obj, npy_half* out) {
     return Status::TypeError("Expected np.float16 instance");
   }
 }
+*/
 
 namespace internal {
 
