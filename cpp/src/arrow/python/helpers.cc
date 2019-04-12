@@ -281,11 +281,11 @@ inline bool MayHaveNaN(PyObject* obj) {
   return !PyType_HasFeature(Py_TYPE(obj), non_nan_tpflags);
 }
 
+/*
 bool PyFloat_IsNaN(PyObject* obj) {
   return PyFloat_Check(obj) && std::isnan(PyFloat_AsDouble(obj));
 }
 
-/*
 bool PandasObjectIsNull(PyObject* obj) {
   if (!MayHaveNaN(obj)) {
     return false;
