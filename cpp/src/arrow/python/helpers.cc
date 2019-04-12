@@ -30,7 +30,7 @@
 // #include "arrow/util/checked_cast.h"
 #include "arrow/util/logging.h"
 
-#include <arrow/api.h>
+// #include <arrow/api.h>
 
 namespace arrow {
 
@@ -308,6 +308,7 @@ Status InvalidValue(PyObject* obj, const std::string& why) {
                          Py_TYPE(obj)->tp_name, ": ", why);
 }
 
+/*
 Status UnboxIntegerAsInt64(PyObject* obj, int64_t* out) {
   if (PyLong_Check(obj)) {
     int overflow = 0;
@@ -376,6 +377,7 @@ Status IntegerScalarToFloat32Safe(PyObject* obj, float* out) {
   *out = static_cast<float>(value);
   return Status::OK();
 }
+*/
 
 }  // namespace internal
 }  // namespace py
