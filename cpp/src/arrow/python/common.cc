@@ -25,7 +25,7 @@
 #include "arrow/status.h"
 #include "arrow/util/logging.h"
 
-#include "arrow/python/helpers.h"
+// #include "arrow/python/helpers.h"
 
 namespace arrow {
 namespace py {
