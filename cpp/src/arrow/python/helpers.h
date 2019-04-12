@@ -25,8 +25,6 @@
 #include <string>
 #include <utility>
 
-#include <numpy/halffloat.h>
-
 #include "arrow/python/visibility.h"
 #include "arrow/type.h"
 #include "arrow/util/macros.h"
@@ -43,10 +41,10 @@ class OwnedRef;
 ARROW_PYTHON_EXPORT std::shared_ptr<DataType> GetPrimitiveType(Type::type type);
 
 // \brief Construct a np.float16 object from a npy_half value.
-ARROW_PYTHON_EXPORT PyObject* PyHalf_FromHalf(npy_half value);
+// ARROW_PYTHON_EXPORT PyObject* PyHalf_FromHalf(npy_half value);
 
 // \brief Convert a Python object to a npy_half value.
-ARROW_PYTHON_EXPORT Status PyFloat_AsHalf(PyObject* obj, npy_half* out);
+// ARROW_PYTHON_EXPORT Status PyFloat_AsHalf(PyObject* obj, npy_half* out);
 
 namespace internal {
 
