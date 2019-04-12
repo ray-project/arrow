@@ -27,6 +27,7 @@
 
 #include "arrow/python/visibility.h"
 // #include "arrow/type.h"
+#include "arrow/status.h"
 #include "arrow/util/macros.h"
 
 namespace arrow {

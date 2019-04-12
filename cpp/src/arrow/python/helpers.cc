@@ -26,7 +26,7 @@
 #include <typeinfo>
 
 #include "arrow/python/common.h"
-#include "arrow/python/decimal.h"
+// #include "arrow/python/decimal.h"
 #include "arrow/util/checked_cast.h"
 #include "arrow/util/logging.h"
 
@@ -285,6 +285,7 @@ bool PyFloat_IsNaN(PyObject* obj) {
   return PyFloat_Check(obj) && std::isnan(PyFloat_AsDouble(obj));
 }
 
+/*
 bool PandasObjectIsNull(PyObject* obj) {
   if (!MayHaveNaN(obj)) {
     return false;
@@ -298,6 +299,7 @@ bool PandasObjectIsNull(PyObject* obj) {
   }
   return false;
 }
+*/
 
 Status InvalidValue(PyObject* obj, const std::string& why) {
   std::string obj_as_str;
